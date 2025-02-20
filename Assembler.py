@@ -6,7 +6,24 @@ regad={'x0':'00000','x1':'00001','x2':'00010','x3':'00011','x4':'00100','x5':'00
 'x11':'01011','x12':'01100','x13':'01101','x14':'01110','x15':'01111','x16':'10000','x17':'10001','x18':'10010','x19':'10011','x20':'10100','x21':'10101','x22':'10110','x23':'10111',
 'x24':'11000','x25':'11001','x26':'11010','x27':'11011','x28':'11100','x29':'11101','x30':'11110','x31':'11111'}
 
-
+def twos_complement2(n: int, bit_length: int = 21) -> str:
+    return format((1 << bit_length) + n, f'0{bit_length}b')
+def binconv2(n):
+        if(n<0):
+            return twos_complement2(n)
+        return format(n,'021b')
+def twos_complement1(n: int, bit_length: int = 13) -> str:
+    return format((1 << bit_length) + n, f'0{bit_length}b')
+def binconv1(n):
+        if(n<0):
+            return twos_complement1(n)
+        return format(n,'013b')
+def twos_complement3(n: int, bit_length: int = 12) -> str:
+    return format((1 << bit_length) + n, f'0{bit_length}b')
+def binconv3(n):
+        if(n<0):
+            return twos_complement3(n)
+        return format(n,'012b')
 def stype(l1,index):
     opcode="0100011"
     f3="010"
@@ -145,3 +162,71 @@ def itype(l1, index):
 
         f = imm_bin + rs1_bin + func3_bin + rd_bin + opcode_bin
         return f
+def btype(st1,st2,st3,labels,index):
+    if(st1=='beq'):
+        if(labels.isdigit() or "-" in labels):
+            n=binconv1(int(labels))
+            imm=str(n)
+            imm1=imm[0]+imm[2:8]
+            imm2=imm[8:12]+imm[1]
+            if (reg[st2] not in regad) or (reg[st3] not in regad):
+                print("Error on line"+str(index))
+                return
+            rs1=regad[reg[st2]]
+            rs2=regad[reg[st3]]
+            ansB=imm1+rs2+rs1+"000"+imm2+"1100011"
+            return(ansB)
+        elif(labels in arr_labels):
+            n=binconv1(int((arr_labels[labels])-k)*4)
+            imm=str(n)
+            imm1=imm[0]+imm[2:8]
+            imm2=imm[8:12]+imm[1]
+            if (reg[st2] not in regad) or (reg[st3] not in regad):
+                print("Error on line"+str(index))
+                return
+            rs1=regad[reg[st2]]
+            rs2=regad[reg[st3]]
+            ansB=imm1+rs2+rs1+"000"+imm2+"1100011"
+            return(ansB)
+    elif(st1=='bne'):
+         if(labels.isdigit() or "-" in labels):
+            n=binconv1(int(labels))
+            imm=str(n)
+            imm1=imm[0]+imm[2:8]
+            imm2=imm[8:12]+imm[1]
+            if (reg[st2] not in regad) or (reg[st3] not in regad):
+                print("Error on line"+str(index))
+                return
+            rs1=regad[reg[st2]]
+            rs2=regad[reg[st3]]
+            ansB=imm1+rs2+rs1+"001"+imm2+"1100011"
+            return(ansB)
+         elif(labels in arr_labels):
+            n=binconv1((arr_labels[labels]-k)*4)
+            imm=str(n)
+            imm1=imm[0]+imm[2:8]
+            imm2=imm[8:12]+imm[1]
+            if (reg[st2] not in regad) or (reg[st3] not in regad):
+                print("Error on line"+str(index))
+                return
+            rs1=regad[reg[st2]]
+            rs2=regad[reg[st3]]
+            ansB=imm1+rs2+rs1+"001"+imm2+"1100011"
+            return(ansB)
+
+
+def jtype(st1,labels,index):
+     rd=regad[reg[st1]]
+     if (reg[st1] not in regad):
+        print("Error on line"+str(index))
+        return
+     if(labels.isdigit() or "-" in labels):
+            n=binconv2(int(labels))
+            imm=str(n)
+            ansJ=imm[0]+imm[10:20]+imm[9]+imm[1:9]
+            return(ansJ+""+rd+""+"1101111")
+     elif(labels in arr_labels):
+        n=binconv2((arr_labels[labels]-k)*4)
+        imm=str(n)
+        ansJ=imm[0]+imm[10:20]+imm[9]+imm[1:9]
+        return (ansJ+""+rd+""+"1101111")
