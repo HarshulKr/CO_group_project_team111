@@ -62,3 +62,86 @@ def rtype(l1,rtypeins,index):
     bi = funct7 + regad[rs2] + regad[rs1] + funct3 + regad[rd] + opcode
     
     return bi
+
+def itype(l1, index):
+    func = l1[0]
+    temp = l1[1].split(",")
+    
+    opcode = {"lw": "0000011", "addi": "0010011", "jalr": "1100111"}
+    funct3 = {"lw": "010", "addi": "000", "jalr": "000"}
+    
+    if func == "lw":
+        if len(temp) != 2:
+            print("Error on line", index)
+            return None
+            
+        load = temp[0]
+        offset, r1 = temp[1].split("(")
+        r1 = r1.replace(")", "")
+
+        if load in reg:
+            load = reg[load]
+        if r1 in reg:
+            r1 = reg[r1]
+
+        if load not in regad or r1 not in regad:
+            print("Error on line", index)
+            return None
+
+        imm_bin = binconv3(int(offset))
+        rd_bin = regad[load]
+        rs1_bin = regad[r1]
+        func3_bin = funct3["lw"]
+        opcode_bin = opcode["lw"]
+        f = imm_bin + rs1_bin + func3_bin + rd_bin + opcode_bin
+        return f
+
+    elif func == "addi":
+        if len(temp) != 3:
+            print("Error on line", index)
+            return None
+
+        rd, rs1, imm = temp
+
+        if rd in reg:
+            rd = reg[rd]
+        if rs1 in reg:
+            rs1 = reg[rs1]
+
+        if rd not in regad or rs1 not in regad:
+            print("Error on line", index)
+            return None
+
+        imm_bin = binconv3(int(imm))
+        rd_bin = regad[rd]
+        rs1_bin = regad[rs1]
+        func3_bin = funct3["addi"]
+        opcode_bin = opcode["addi"]
+
+        f = imm_bin + rs1_bin + func3_bin + rd_bin + opcode_bin
+        return f
+
+    elif func == "jalr":
+        if len(temp) != 3:
+            print("Error on line", index)
+            return None
+
+        rd, rs1, imm = temp
+
+        if rd in reg:
+            rd = reg[rd]
+        if rs1 in reg:
+            rs1 = reg[rs1]
+
+        if rd not in regad or rs1 not in regad:
+            print("Error on line", index)
+            return None
+
+        imm_bin = binconv3(int(imm))
+        rd_bin = regad[rd]
+        rs1_bin = regad[rs1]
+        func3_bin = funct3["jalr"]
+        opcode_bin = opcode["jalr"]
+
+        f = imm_bin + rs1_bin + func3_bin + rd_bin + opcode_bin
+        return f
