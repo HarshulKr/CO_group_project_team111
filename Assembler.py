@@ -5,3 +5,60 @@ reg={'zero':'x0','ra':'x1','sp':'x2','gp':'x3','tp':'x4','t0':'x5','t1':'x6','t2
 regad={'x0':'00000','x1':'00001','x2':'00010','x3':'00011','x4':'00100','x5':'00101','x6':'00110','x7':'00111','x8':'01000','x9':'01001','x10':'01010',
 'x11':'01011','x12':'01100','x13':'01101','x14':'01110','x15':'01111','x16':'10000','x17':'10001','x18':'10010','x19':'10011','x20':'10100','x21':'10101','x22':'10110','x23':'10111',
 'x24':'11000','x25':'11001','x26':'11010','x27':'11011','x28':'11100','x29':'11101','x30':'11110','x31':'11111'}
+
+
+def stype(l1,index):
+    opcode="0100011"
+    f3="010"
+    l2=l1[1].split(",")
+    rs2=regad[reg[l2[0]]]
+    l3=(l2[1]).split("(")
+    rs1=regad[reg[l3[1][0:2]]]
+
+    if l1[0]!="sw" or (reg[l2[0]] not in regad) or (reg[l3[1][0:2]] not in regad):
+        print("Error on line",+str(index))
+        return
+    
+    imm=binconv3(int(l3[0]))
+    f=imm[0:7]+rs2+rs1+f3+imm[7:12]+opcode
+    return f
+
+def rtype(l1,rtypeins,index):
+    ins=l1[0]
+    l2=l1[1].split(",")
+    if len(l2)!=3:
+        print("Error on line"+str(index))
+        return
+    rs2=reg[l2[2]]
+    rs1=reg[l2[1]]
+    rd=reg[l2[0]]
+    if (ins not in  rtypeins) or (rs1 not in regad) or (rs2 not in regad) or (rd not in regad):
+        print("Error on line"+str(index))
+        return
+    
+    funct3='000'
+    funct7='0000000'
+
+    if ins == 'add':
+        funct3 = '000'
+        funct7 = '0000000' 
+    elif ins == 'sub':
+        funct3 = '000'
+        funct7 = '0100000' 
+    elif ins == 'slt':
+        funct3 = '010'
+        funct7 = '0000000'  
+    elif ins == 'srl':
+        funct3 = '101'
+        funct7 = '0000000'  
+    elif ins == 'or':
+        funct3 = '110'
+        funct7 = '0000000'  
+    elif ins == 'and':
+        funct3 = '111'
+        funct7 = '0000000' 
+   
+    opcode = '0110011'  
+    bi = funct7 + regad[rs2] + regad[rs1] + funct3 + regad[rd] + opcode
+    
+    return bi
