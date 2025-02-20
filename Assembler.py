@@ -6,6 +6,16 @@ regad={'x0':'00000','x1':'00001','x2':'00010','x3':'00011','x4':'00100','x5':'00
 'x11':'01011','x12':'01100','x13':'01101','x14':'01110','x15':'01111','x16':'10000','x17':'10001','x18':'10010','x19':'10011','x20':'10100','x21':'10101','x22':'10110','x23':'10111',
 'x24':'11000','x25':'11001','x26':'11010','x27':'11011','x28':'11100','x29':'11101','x30':'11110','x31':'11111'}
 
+import sys
+filename = sys.argv[1]
+output = sys.argv[2]
+
+# filename = "testcases.txt"
+# output = "text.txt"
+
+arr_labels={}
+k=0
+
 def twos_complement2(n: int, bit_length: int = 21) -> str:
     return format((1 << bit_length) + n, f'0{bit_length}b')
 def binconv2(n):
@@ -230,3 +240,69 @@ def jtype(st1,labels,index):
         imm=str(n)
         ansJ=imm[0]+imm[10:20]+imm[9]+imm[1:9]
         return (ansJ+""+rd+""+"1101111")
+
+def read_assembly_file(filename):
+    instructions = []
+    
+    with open(filename, 'r') as file:
+        for line in file:
+            line = line.strip()
+            if line and not line.startswith('#'):
+                instructions.append(line)
+    
+    return instructions
+instruction_array = read_assembly_file(filename)
+
+j=1
+jjj=0
+for i in instruction_array:
+    for lop in range(0,len(i)):
+        if(i[lop]==':' and i[lop+1]!=" "):
+            instruction_array[jjj]=i[0:lop+1]+" "+i[lop+1:len(i)]
+            i=i[0:lop+1]+" "+i[lop+1:len(i)]
+    parts = i.replace(',', ' ').split()
+    if(':' in parts[0]):
+         parts0=parts[0]
+         arr_labels[parts0[:-1]]=j
+    j+=1
+    jjj+=1
+k=1
+with open(output, 'w') as file:
+    for i in instruction_array:
+        parts = i.replace(',', ' ').split()
+        rtypeins=['add','sub','slt','srl','or','and']
+        itypeins=['lw','addi','jalr']
+        stypeins=['sw']
+        btype_ins=['beq','bne']
+        jtype_ins=['jal']
+        l1=i.split()
+        f=""
+        if(parts[0] in btype_ins):
+            f=btype(parts[0],parts[1],parts[2],parts[3],k)
+        elif(parts[0] in jtype_ins):
+            f=jtype(parts[1],parts[2],k)
+        elif (parts[0] in rtypeins):
+            f=rtype(l1,rtypeins,k)
+        elif (parts[0] in itypeins):
+            f=itype(l1,k)
+        elif (parts[0] in stypeins):
+            f=stype(l1,k)
+        elif(':' in parts[0]):
+            if(parts[1] in btype_ins):
+                f=btype(parts[1],parts[2],parts[3],parts[4],k)
+            elif(parts[1] in jtype_ins):
+                f=jtype(parts[2],parts[3],k)
+            elif (parts[1] in rtypeins):
+                l1=l1[1:3]
+                f=rtype(l1,rtypeins,k)
+            elif (parts[1] in stypeins):
+                l1=l1[1:3]
+                f=stype(l1,k)
+            elif (parts[1] in itypeins):
+                l1=l1[1:3]
+                f=itype(l1,k)
+        else:
+            print("The instruction name is not correct")   
+        if f is not None:
+                file.write(f+"\n")
+        k+=1
