@@ -32,6 +32,7 @@ instruction_array = read_assembly_file(filename)
 def decimal_to_hex(decimal_number):
     d2h= f"0x{decimal_number:08X}"
     return d2h
+
 def printer():
     print(pc, end=" ")
     for i in range(32):
@@ -93,29 +94,26 @@ def sub(rs1,rs2,rd):
 
 def or1(rs1,rs2,rd):
     global pc
-    r1=ibit(rs1)
-    r2=ibit(rs2)
-    r=""
-    for i in range(0,6):
-        if (r1[i]=="0" and r2[i]=="1") or (r1[i]=="1" and r2[i]=="1") or (r1[i]=="1" or r2[i]=="0"):
-            r+="1"
-        else:
-            r+="0"
-    arr[rd]=int(r,2)
+    arr[rd]=arr[rs1] | arr[rs2]
     pc+=4
     printer()
 
 def and1(rs1,rs2,rd):
     global pc
-    r1=ibit(rs1)
-    r2=ibit(rs2)
-    r=""
-    for i in range(0,6):
-        if (r1[i]=="0" and r2[i]=="1") or (r1[i]=="0" and r2[i]=="0") or (r1[i]=="1" or r2[i]=="0"):
-            r+="0"
-        else:
-            r+="1"
-    arr[rd]=int(r,2)
+    arr[rd]=arr[rs1] & arr[rs2]
+    pc+=4
+    printer()
+
+def slt(rd,rs1,rs2):
+    if arr[rs1]<arr[rs2] :     
+        r=1
+        arr[rd]=r
+    pc+=4
+    printer()
+
+def srl(rd,rs1,rs2):        
+    r = arr[rs1]>>(arr[rs2]%32)
+    arr[rd]=r
     pc+=4
     printer()
 
