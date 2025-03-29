@@ -12,6 +12,11 @@ ram_dict = {
         "0x00010070", "0x00010074", "0x00010078", "0x0001007C"
     ]
 }
+
+###############################
+#      file input
+
+
 output = "text.txt"
 filename = "testcases.txt"
 with open(output, 'w') as file:
@@ -45,12 +50,14 @@ def printer():
             file.write(" " + str(arr[i]) + " ")
         file.write("\n")
 
+
+#################################################
+#        instructions
+
+
 def sw(imm,rs1,rs2):
     global pc
-    # print(decimal_to_hex(rs1+imm))
-    # print(ram_dict[decimal_to_hex(rs1+imm)])
     ram_dict[decimal_to_hex(rs1+imm)]=rs2
-    # print(ram_dict[decimal_to_hex(rs1+imm)])
     pc+=4
     printer()
 
@@ -122,6 +129,9 @@ def addi (imm,rs,rd):
     arr[rd]=arr[rs]+imm
     pc+=4
     printer()
+
+#################################
+#      main
 
 print("\npc", end=" ")
 for i in range(32):
