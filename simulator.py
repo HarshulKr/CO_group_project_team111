@@ -38,6 +38,7 @@ def decimal_to_hex(decimal_number):
     d2h= f"0x{decimal_number:08X}"
     return d2h
 
+
 def printer():
     print(pc, end=" ")
     for i in range(32):
@@ -54,6 +55,23 @@ def printer():
 #################################################
 #        instructions
 
+# def slicing(s):
+#     op=s[-1:-7:-1]
+#     if op=="0110011":
+#         #rtype ka return kar rs2,rs1,rd
+#     elif op=="0000011":
+#         #lw
+#     elif op=="0010011":
+#         #addi
+#     elif op=="1100111":
+#         #jalr
+#     elif op=="0100011":
+#         #sw
+#     elif op=="1100011":
+#         #beq,bne
+#     elif op=="1101111":
+#         #jal
+#     #return the components that each one has like registers and immediate
 
 def sw(imm,rs1,rs2):
     global pc
@@ -61,21 +79,20 @@ def sw(imm,rs1,rs2):
     pc+=4
     printer()
 
-def bne(rs1, rs2, imm):
-    global pc
-    if arr[rs1] != arr[rs2]:
-        pc += imm
-    else:
-        pc += 4
-    printer()
-
-def beq(rs1, rs2, imm):
-    global pc
-    if arr[rs1] == arr[rs2]:
-        pc += imm
-    else:
-        pc += 4
-    printer()
+def btype(rs1,rs2,imm,c):
+     global pc
+    if c==1: #bne
+        if arr[rs1] != arr[rs2]:
+            pc += imm
+        else:
+            pc += 4
+        printer()
+    elif c==2: #beq
+        if arr[rs1] == arr[rs2]:
+            pc += imm
+        else:
+            pc += 4
+        printer()
 
 def jal(rd, imm):
     global pc 
@@ -83,40 +100,33 @@ def jal(rd, imm):
     pc += imm
     printer()
 
-def add(rs1,rs2,rd):
+def rtype(rs1,rs2,rd,c):
     global pc
-    arr[rd]=arr[rs1]+arr[rs2]
-    pc +=4
-
-def sub(rs1,rs2,rd):
-    global pc
-    arr[rd]=arr[rs1]-arr[rs2]
-    pc+=4
-
-def or1(rs1,rs2,rd):
-    global pc
-    arr[rd]=arr[rs1] | arr[rs2]
-    pc+=4
-    printer()
-
-def and1(rs1,rs2,rd):
-    global pc
-    arr[rd]=arr[rs1] & arr[rs2]
-    pc+=4
-    printer()
-
-def slt(rd,rs1,rs2):
-    if arr[rs1]<arr[rs2] :     
-        r=1
+    if c==1: #add
+        arr[rd]=arr[rs1]+arr[rs2]
+        pc +=4
+    elif c==2: #sub
+        arr[rd]=arr[rs1]-arr[rs2]
+        pc+=4
+    elif c==3: #or
+        arr[rd]=arr[rs1] | arr[rs2]
+        pc+=4
+        printer()
+    elif c==4: #and
+        arr[rd]=arr[rs1] & arr[rs2]
+        pc+=4
+        printer()
+    elif c==5: #slt
+        if arr[rs1]<arr[rs2] :     
+            r=1
+            arr[rd]=r
+        pc+=4
+        printer()
+    elif c==6: #srl     
+        r = arr[rs1]>>(arr[rs2]%32)
         arr[rd]=r
-    pc+=4
-    printer()
-
-def srl(rd,rs1,rs2):        
-    r = arr[rs1]>>(arr[rs2]%32)
-    arr[rd]=r
-    pc+=4
-    printer()
+        pc+=4
+        printer()
 
 def addi (imm,rs,rd):
     global pc
@@ -136,8 +146,8 @@ for i in range(32):
 print()
 
 # Test cases
-bne(0, 1, 12)
-beq(0, 1, 12)
+btype(0, 1, 12,1)
+btype(0, 1, 12,2)
 jal(30, -12)
 sw(600,65000,20)
 
