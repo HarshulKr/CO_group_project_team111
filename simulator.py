@@ -83,12 +83,6 @@ def jal(rd, imm):
     pc += imm
     printer()
 
-def jal(rd, imm):
-    global pc 
-    arr[rd] = pc + 4
-    pc += imm
-    printer()
-
 def add(rs1,rs2,rd):
     global pc
     arr[rd]=arr[rs1]+arr[rs2]
