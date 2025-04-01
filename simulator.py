@@ -55,23 +55,90 @@ def printer():
 #################################################
 #        instructions
 
-# def slicing(s):
-#     op=s[-1:-7:-1]
-#     if op=="0110011":
-#         #rtype ka return kar rs2,rs1,rd
-#     elif op=="0000011":
-#         #lw
-#     elif op=="0010011":
-#         #addi
-#     elif op=="1100111":
-#         #jalr
-#     elif op=="0100011":
-#         #sw
-#     elif op=="1100011":
-#         #beq,bne
-#     elif op=="1101111":
-#         #jal
-#     #return the components that each one has like registers and immediate
+def slicing(s):
+    op=s[-1:-8:-1]
+    if op=="0110011":
+        rd = int(s[-8:-13:-1], 2)
+        func3 = s[-13:-16:-1]
+        rs1 = int(s[-16:-21:-1], 2)
+        rs2 = int(s[-21:-27:-1], 2)
+        func7 = s[-27:-33:-1]
+
+        if(func3=="000"):
+            if(func7=="0000000"):#add
+                rtype(rs1,rs2,rd,1)
+            elif(func7=="0100000"):#sub
+                rtype(rs1,rs2,rd,2)
+        elif(func3=="010"):#slt
+                rtype(rs1,rs2,rd,5)
+        elif(func3=="101"):#srl
+                rtype(rs1,rs2,rd,6)
+        elif(func3=="110"):#or
+                rtype(rs1,rs2,rd,3)
+        elif(func3=="111"):#and
+                rtype(rs1,rs2,rd,4)
+        
+        #rtype ka return kar rs2,rs1,rd
+    elif op=="0000011":
+        #lw
+        rd = int(s[-8:-13:-1], 2)
+        func3 = s[-13:-16:-1]
+        rs1 = int(s[-16:-21:-1], 2)
+        imm = int(s[-21:-33:-1], 2)
+        lw(rs1,rd,imm)
+        
+    elif op=="0010011":
+        rd = int(s[-8:-13:-1], 2)
+        func3 = s[-13:-16:-1]
+        rs1 = int(s[-16:-21:-1], 2)
+        imm = int(s[-21:-33:-1], 2)
+        addi(imm,rs1,rd)
+
+
+
+        #addi
+    elif op=="1100111":
+        rd = int(s[-8:-13:-1], 2)
+        func3 = s[-13:-16:-1]
+        rs1 = int(s[-16:-21:-1], 2)
+        imm = int(s[-21:-33:-1], 2)
+        
+        jalr(rd,imm)
+        #jalr
+    elif op=="0100011":
+        imm1 = int(s[-8:-13:-1], 2)
+        func3 = s[-13:-16:-1]
+        rs1 = int(s[-16:-21:-1], 2)
+        rs2 = int(s[-21:-27:-1], 2)
+        imm2 = int(s[-27:-33:-1], 2)
+        final = (imm2 << 5) | imm1
+        sw(final,rs1,rs2)
+
+        #sw
+    elif op == "1100011":
+        imm1 = s[-8:-13:-1]
+        func3 = s[-13:-16:-1]
+        rs1 = s[-16:-21:-1]
+        rs2 = s[-21:-27:-1]
+        imm2 = s[-27:-33:-1]
+
+        imm = imm2[0] + imm1[-1] + imm2[1:] + imm1[:-1] + "0"
+        final_imm = int(imm, 2)
+
+        if func3 == "000":
+            btype(rs1, rs2, final_imm)
+        else:
+            btype(rs1, rs2, final_imm)
+
+
+    elif op=="1101111":
+        rd = int(s[-8:-13:-1], 2)
+        imm=int(s[-13:-33:-1],2)
+
+        jal(rd,imm)
+        #jal
+    #return the components that each one has like registers and immediate
+
 
 def sw(rs2, rs1, imm):
     global pc
