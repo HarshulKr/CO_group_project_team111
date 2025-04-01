@@ -73,14 +73,32 @@ def printer():
 #         #jal
 #     #return the components that each one has like registers and immediate
 
-def sw(imm,rs1,rs2):
+def sw(rs2, rs1, imm):
     global pc
-    ram_dict[decimal_to_hex(rs1+imm)]=rs2
-    pc+=4
+    address=arr[rs1] + imm  
+    ram_dict[decimal_to_hex(address)]=arr[rs2]  
+    pc += 4  
     printer()
 
+
+def lw(rd, rs1, imm):
+    global pc
+    address=arr[rs1]+imm 
+    arr[rd]=ram_dict.get(decimal_to_hex(address), 0)  # Load the word
+    pc+=4  
+    printer()
+
+def jalr(rd, rs1, imm):
+    global pc
+    temp=pc+4
+    pc=(arr[rs1]+imm) & ~1
+    arr[rd]=temp
+    printer()
+
+
+
 def btype(rs1,rs2,imm,c):
-     global pc
+    global pc
     if c==1: #bne
         if arr[rs1] != arr[rs2]:
             pc += imm
@@ -96,7 +114,7 @@ def btype(rs1,rs2,imm,c):
 
 def jal(rd, imm):
     global pc 
-    arr[rd] = pc + 4
+    arr[rd]=pc + 4
     pc += imm
     printer()
 
@@ -123,7 +141,7 @@ def rtype(rs1,rs2,rd,c):
         pc+=4
         printer()
     elif c==6: #srl     
-        r = arr[rs1]>>(arr[rs2]%32)
+        r=arr[rs1]>>(arr[rs2]%32)
         arr[rd]=r
         pc+=4
         printer()
