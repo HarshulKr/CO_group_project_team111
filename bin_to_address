@@ -1,0 +1,189 @@
+# import sys
+# filename = sys.argv[1]
+# output = sys.argv[2]
+filename = "testcases.txt" 
+output = "text.txt"
+pc=0
+arr=[0]*32
+arr[2]=380
+label_flag=True
+count_label=0
+ram_dict = {f"0x{addr:08X}": 0 for addr in range(0x00010000, 0x00010080, 4)}
+
+#conversions
+#####################################################################################
+def twos_complement1(n: int, bit_length: int = 32) -> str:
+    return format((1 << bit_length) + n, f'0{bit_length}b')
+def binconv1(n):
+    if n<0:
+        return twos_complement1(n)
+    return format(n, '032b')
+def binary_to_decimal(binary: str) -> int:
+    length = len(binary)
+    is_negative = binary[0] == '1'
+    if is_negative:
+        inverted = ''.join('0' if bit == '1' else '1' for bit in binary)
+        decimal = int(inverted, 2) + 1
+        return -decimal
+    else:
+        return int(binary, 2)
+def decimal_to_hex(decimal_number):
+    return f"0x{decimal_number:08X}"
+#######################################################################################
+
+#I/O
+#######################################################################################
+with open(output,'w') as file:
+    file.write("")
+
+def read_assembly_file(filename):
+    instructions = []
+    with open(filename,'r') as file:
+        for line in file:
+            line=line.strip()
+            if line and not line.startswith('#'):
+                instructions.append(line)
+    return instructions
+
+def printer2():
+     output2="output_readable.txt"
+     print(pc, end=" ")
+     for i in range(32):
+        print(" ", arr[i], end=" ")
+     print()
+ 
+     with open(output2, 'a') as file:
+         file.write(str(pc) + " ")
+         for i in range(32):
+             file.write(" " + str(arr[i]) + " ")
+         file.write("\n")
+
+def printer():
+    with open(output, 'a') as file:
+        file.write(f"0b{binconv1(pc)} ")
+        for i in range(32):
+            file.write(f"0b{binconv1(arr[i])} ")  
+        file.write("\n")
+    printer2()
+##########################################################################################
+
+#Main Execution
+
+#########################################################################################
+
+ins = read_assembly_file(filename)
+i=0
+while(i<len(ins)):
+    #print(i)
+    if(count_label<0):
+        i-=(count_label/4)
+        count_label=0
+        continue
+    elif(count_label>0):
+        i+=(count_label/4)
+        count_label=0
+        continue
+    else:
+        s=ins[i]
+        op=s[-7:]
+        if(op=="0110011"):
+            rd=binary_to_decimal(s[-12:-7])
+            func3=s[-15:-12]
+            rs1=binary_to_decimal(s[-25:-20])
+            rs2=binary_to_decimal(s[-25:-20])
+            func7=s[:7]
+
+            if func3 == "000":
+                if func7 == "0000000":
+                    print("add,rs1,rs2,rd",rs1,rs2,rd)
+
+                elif func7 == "0100000":
+                    print("sub,rs1,rs2,rd",rs1,rs2,rd)
+            elif func3 =="010":
+                print("slt,rs1,rs2,rd",rs1,rs2,rd)
+            elif func3 == "101":
+                print("srl,rs1,rs2,rd",rs1,rs2,rd)
+            elif func3 == "110":
+                print("or,rs1,rs2,rd",rs1,rs2,rd)
+            elif func3 == "111":
+                print("and,rs1,rs2,rd",rs1,rs2,rd)
+        elif(op=="0000011"):
+            rd = binary_to_decimal(s[-12:-7])
+            rs1 = binary_to_decimal(s[-20:-15])
+            imm = binary_to_decimal(s[:12])
+            print("lw,rd, rs1, imm",rd, rs1, imm)
+        elif(op=="0010011"):
+            rd = binary_to_decimal(s[-12:-7])
+            rs1 = binary_to_decimal(s[-20:-15])
+            imm = binary_to_decimal(s[:12])
+            print("addi,imm, rs1, rd",imm, rs1, rd)
+        elif(op=="1100111"):
+            rd = binary_to_decimal(s[-8:-13:-1])
+            func3 = s[-13:-16:-1]
+            rs1 = binary_to_decimal(s[-16:-21:-1])
+            imm = binary_to_decimal(s[-21:-33:-1])
+            print("jalr,rd,rs1,imm",rd,rs1,imm)
+        elif(op=="0100011"):
+            imm1 = binary_to_decimal(s[-8:-13:-1])
+            func3 = s[-13:-16:-1]
+            rs1 = binary_to_decimal(s[-16:-21:-1])
+            rs2 = binary_to_decimal(s[-21:-27:-1])
+            imm2 = binary_to_decimal(s[-27:-33:-1])
+            final = (imm2 << 5) | imm1
+            print("sw,final,rs1,rs2",final,rs1,rs2)
+
+        elif(op=="1100011"):
+            #print("beq,bne")
+            
+
+            imm1=s[20:25]
+            imm2=s[0:7]
+            imm12=imm2[0]
+            imm5_10=imm2[6:0:-1]
+            imm11=imm1[4]
+            imm1_4=imm1[3:0:-1]+imm1[0]
+            imm="0"+imm1_4+imm5_10+imm11+imm12
+            imm=imm[::-1]
+
+
+            imm = binary_to_decimal(imm)
+            func3 = s[-13:-16:-1]
+            rs1=binary_to_decimal(s[-16:-21:-1])
+            rs2=binary_to_decimal(s[7:12])
+
+            if func3 == "000":
+                print("beq,rs1,rs2,imm",rs1,rs2,imm)
+                if arr[rs1] == arr[rs2]:
+                    pc += imm
+                else:
+                    pc += 4
+                #printer()
+                if(rs1==rs2 and imm==0):
+                    print("end")
+                    exit(1)
+
+            elif func3=="001":
+                print("bne ,rs1,rs2,imm",rs1,rs2,imm)
+                if arr[rs1] != arr[rs2]:
+                    pc += imm
+                    count_label=imm
+                else:
+                    pc += 4
+                #printer()
+
+        elif(op=="1101111"):
+            rd = binary_to_decimal(s[-8:-13:-1])
+            imm= binary_to_decimal(s[-13:-33:-1])
+            arr[rd]=pc + 4
+            print("jal,rd,imm",rd,imm)
+            pc += imm
+            count_label=imm
+            #printer()
+        i+=1               #pc+4
+###################################################################################
+
+##RAM Output
+####################################################################################
+with open(output, 'a') as file:
+    for key, value in ram_dict.items():
+        file.write(f"{key}:0b{binconv1(value)}\n")
