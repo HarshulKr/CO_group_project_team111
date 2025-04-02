@@ -1,144 +1,128 @@
-pc = 0
-arr = [0] * 32
-ram_dict = {
-    addr: 0 for addr in [
-        "0x00010000", "0x00010004", "0x00010008", "0x0001000C",
-        "0x00010010", "0x00010014", "0x00010018", "0x0001001C",
-        "0x00010020", "0x00010024", "0x00010028", "0x0001002C",
-        "0x00010030", "0x00010034", "0x00010038", "0x0001003C",
-        "0x00010040", "0x00010044", "0x00010048", "0x0001004C",
-        "0x00010050", "0x00010054", "0x00010058", "0x0001005C",
-        "0x00010060", "0x00010064", "0x00010068", "0x0001006C",
-        "0x00010070", "0x00010074", "0x00010078", "0x0001007C"
-    ]
-}
+import sys
+filename = sys.argv[1]
+output = sys.argv[2]
+pc=0
+arr=[0]*32
+arr[2]=380
+ram_dict = {f"0x{addr:08X}": 0 for addr in range(0x00010000, 0x00010080, 4)}
 
 ###############################
-#      file input
+#      File Input
 
+def twos_complement1(n: int, bit_length: int = 32) -> str:
+    return format((1 << bit_length) + n, f'0{bit_length}b')
 
-output = "text.txt"
-filename = "testcases.txt"
-with open(output, 'w') as file:
+def binconv1(n):
+    if n<0:
+        return twos_complement1(n)
+    return format(n, '032b')
+
+# filename = "testcases.txt" 
+# output = "text.txt"
+
+with open(output,'w') as file:
     file.write("")
+
 def read_assembly_file(filename):
     instructions = []
-    
-    with open(filename, 'r') as file:
+    with open(filename,'r') as file:
         for line in file:
-            line = line.strip()
+            line=line.strip()
             if line and not line.startswith('#'):
                 instructions.append(line)
-    
     return instructions
-instruction_array = read_assembly_file(filename)
-#print(instruction_array)
 
 def decimal_to_hex(decimal_number):
-    d2h= f"0x{decimal_number:08X}"
-    return d2h
-
+    return f"0x{decimal_number:08X}"
 
 def printer():
-    print(pc, end=" ")
-    for i in range(32):
-        print(" ", arr[i], end=" ")
-    print()
-    
     with open(output, 'a') as file:
-        file.write(str(pc) + " ")
+        file.write(f"0b{binconv1(pc)} ")
         for i in range(32):
-            file.write(" " + str(arr[i]) + " ")
+            file.write(f"0b{binconv1(arr[i])} ")  
         file.write("\n")
 
-
 #################################################
-#        instructions
+#        Instruction Processing
 
 def slicing(s):
-    op=s[-1:-8:-1]
-    if op=="0110011":
-        rd = int(s[-8:-13:-1], 2)
-        func3 = s[-13:-16:-1]
-        rs1 = int(s[-16:-21:-1], 2)
-        rs2 = int(s[-21:-27:-1], 2)
-        func7 = s[-27:-33:-1]
+    op=s[-7:]
+    try:
+        if op == "0110011":  # R-type
+            rd=int(s[-12:-7], 2)
+            func3=s[-15:-12]
+            rs1=int(s[-20:-15], 2)
+            rs2=int(s[-25:-20], 2)
+            func7=s[:7]
 
-        if(func3=="000"):
-            if(func7=="0000000"):#add
-                rtype(rs1,rs2,rd,1)
-            elif(func7=="0100000"):#sub
-                rtype(rs1,rs2,rd,2)
-        elif(func3=="010"):#slt
-                rtype(rs1,rs2,rd,5)
-        elif(func3=="101"):#srl
-                rtype(rs1,rs2,rd,6)
-        elif(func3=="110"):#or
-                rtype(rs1,rs2,rd,3)
-        elif(func3=="111"):#and
-                rtype(rs1,rs2,rd,4)
+            if func3 == "000":
+                if func7 == "0000000":
+                    rtype(rs1, rs2, rd, 1)  # ADD
+                elif func7 == "0100000":
+                    rtype(rs1, rs2, rd, 2)  # SUB
+            elif func3 =="010":
+                rtype(rs1, rs2, rd, 5)  # SLT
+            elif func3 == "101":
+                rtype(rs1, rs2, rd, 6)  # SRL
+            elif func3 == "110":
+                rtype(rs1, rs2, rd, 3)  # OR
+            elif func3 == "111":
+                rtype(rs1, rs2, rd, 4)  # AND
         
-        #rtype ka return kar rs2,rs1,rd
-    elif op=="0000011":
-        #lw
-        rd = int(s[-8:-13:-1], 2)
-        func3 = s[-13:-16:-1]
-        rs1 = int(s[-16:-21:-1], 2)
-        imm = int(s[-21:-33:-1], 2)
-        lw(rs1,rd,imm)
+        elif op == "0000011":  # LW
+            rd = int(s[-12:-7], 2)
+            rs1 = int(s[-20:-15], 2)
+            imm = int(s[:12], 2)
+            lw(rd, rs1, imm)
         
-    elif op=="0010011":
-        rd = int(s[-8:-13:-1], 2)
-        func3 = s[-13:-16:-1]
-        rs1 = int(s[-16:-21:-1], 2)
-        imm = int(s[-21:-33:-1], 2)
-        addi(imm,rs1,rd)
-
-
-
-        #addi
-    elif op=="1100111":
-        rd = int(s[-8:-13:-1], 2)
-        func3 = s[-13:-16:-1]
-        rs1 = int(s[-16:-21:-1], 2)
-        imm = int(s[-21:-33:-1], 2)
+        elif op == "0010011":  # ADDI
+            rd = int(s[-12:-7], 2)
+            rs1 = int(s[-20:-15], 2)
+            imm = int(s[:12], 2)
+            addi(imm, rs1, rd)
         
-        jalr(rd,imm)
-        #jalr
-    elif op=="0100011":
-        imm1 = int(s[-8:-13:-1], 2)
-        func3 = s[-13:-16:-1]
-        rs1 = int(s[-16:-21:-1], 2)
-        rs2 = int(s[-21:-27:-1], 2)
-        imm2 = int(s[-27:-33:-1], 2)
-        final = (imm2 << 5) | imm1
-        sw(final,rs1,rs2)
-
+        elif op=="1100111":
+            rd = int(s[-8:-13:-1], 2)
+            func3 = s[-13:-16:-1]
+            rs1 = int(s[-16:-21:-1], 2)
+            imm = int(s[-21:-33:-1], 2)
+            
+            jalr(rd,rs1,imm)
+            #jalr
+        
+        elif op=="0100011":
+            imm1 = int(s[-8:-13:-1], 2)
+            func3 = s[-13:-16:-1]
+            rs1 = int(s[-16:-21:-1], 2)
+            rs2 = int(s[-21:-27:-1], 2)
+            imm2 = int(s[-27:-33:-1], 2)
+            final = (imm2 << 5) | imm1
+            sw(final,rs1,rs2)
         #sw
-    elif op == "1100011":
-        imm1 = s[-8:-13:-1]
-        func3 = s[-13:-16:-1]
-        rs1 = s[-16:-21:-1]
-        rs2 = s[-21:-27:-1]
-        imm2 = s[-27:-33:-1]
+        elif op == "1100011":
+            imm1 = s[-8:-13:-1]
+            func3 = s[-13:-16:-1]
+            rs1 = int(s[-16:-21:-1],2)
+            rs2 = int(s[-21:-27:-1],2)
+            imm2 = s[-27:-33:-1]
 
-        imm = imm2[0] + imm1[-1] + imm2[1:] + imm1[:-1] + "0"
-        final_imm = int(imm, 2)
+            imm = imm2[0] + imm1[-1] + imm2[1:] + imm1[:-1] + "0"
+            final_imm = int(imm, 2)
 
-        if func3 == "000":
-            btype(rs1, rs2, final_imm)
-        else:
-            btype(rs1, rs2, final_imm)
+            if func3 == "000":
+                btype(rs1, rs2, final_imm,2)
+            else:
+                btype(rs1, rs2, final_imm,1)
+        
+        elif op=="1101111":
+            rd = int(s[-8:-13:-1], 2)
+            imm=int(s[-13:-33:-1],2)
+            jal(rd,imm)
+            #jal
+    except Exception as e:
+        print(f"Error processing instruction: {s}, Error: {e}")
 
-
-    elif op=="1101111":
-        rd = int(s[-8:-13:-1], 2)
-        imm=int(s[-13:-33:-1],2)
-
-        jal(rd,imm)
-        #jal
-    #return the components that each one has like registers and immediate
-
+# Instruction Implementations
 
 def sw(rs2, rs1, imm):
     global pc
@@ -146,7 +130,6 @@ def sw(rs2, rs1, imm):
     ram_dict[decimal_to_hex(address)]=arr[rs2]  
     pc += 4  
     printer()
-
 
 def lw(rd, rs1, imm):
     global pc
@@ -220,26 +203,13 @@ def addi (imm,rs,rd):
     printer()
 
 #################################
-#      main
+#      Main Execution
 
-print("\npc", end=" ")
-for i in range(32):
-    if i < 10:
-        print(" x", end="0" + str(i))
-    else:
-        print(" x", end=str(i))
-print()
+ins = read_assembly_file(filename)
+for i in ins:
+    slicing(i)
 
-# Test cases
-btype(0, 1, 12,1)
-btype(0, 1, 12,2)
-jal(30, -12)
-sw(600,65000,20)
-
-#ram output
-f=""
+# RAM Output
 with open(output, 'a') as file:
     for key, value in ram_dict.items():
-        f=str(key)+":"+str(value)+"\n"
-        file.write(f)
-        print(f,end="")
+        file.write(f"{key}:0b{binconv1(value)}\n")
