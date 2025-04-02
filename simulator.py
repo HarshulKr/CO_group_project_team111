@@ -1,6 +1,6 @@
-import sys
-filename = sys.argv[1]
-output = sys.argv[2]
+# import sys
+# filename = sys.argv[1]
+# output = sys.argv[2]
 pc=0
 arr=[0]*32
 arr[2]=380
@@ -17,8 +17,8 @@ def binconv1(n):
         return twos_complement1(n)
     return format(n, '032b')
 
-# filename = "testcases.txt" 
-# output = "text.txt"
+filename = "testcases.txt" 
+output = "text.txt"
 
 with open(output,'w') as file:
     file.write("")
@@ -103,7 +103,7 @@ def slicing(s):
             imm1 = s[-8:-13:-1]
             func3 = s[-13:-16:-1]
             rs1 = int(s[-16:-21:-1],2)
-            rs2 = int(s[-21:-27:-1],2)
+            rs2 = int(s[-22:-27:-1],2)
             imm2 = s[-27:-33:-1]
 
             imm = imm2[0] + imm1[-1] + imm2[1:] + imm1[:-1] + "0"
