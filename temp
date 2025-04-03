@@ -1,0 +1,15 @@
+            print("jal")
+            rd = int(s[20:25], 2)
+            # imm20=s[0]
+            # imm1_10=s[1:11]
+            # imm11=s[11]
+            # imm12_19=s[19:11:-1]
+            imm=s[0]+s[12:20]+s[10:11]+s[1:11]
+            imm=binary_to_decimal(imm)
+            arr[rd]=pc + 4
+            print("rd and imm are",rd,imm)
+            pc += 2*imm
+            pc= pc & ~1
+            count_label=imm//2
+            #20/:254)-1
+            printer()
