@@ -1,8 +1,8 @@
-import sys
-filename = sys.argv[1]
-output = sys.argv[2]
-# filename = "testcases.txt" 
-# output = "text.txt"
+# import sys
+# filename = sys.argv[1]
+# output = sys.argv[2]
+filename = "testcases.txt" 
+output = "text.txt"
 pc=0
 arr=[0]*32
 arr[2]=380
@@ -52,10 +52,10 @@ def printer2():
         print(" ", arr[i], end=" ")
      print()
  
-     with open(output2, 'a') as file:
-         file.write(str(pc) + " ")
+     with open(output, 'a') as file:
+         file.write("0b"+str(pc) + " ")
          for i in range(32):
-             file.write(" " + str(arr[i]) + " ")
+             file.write("0b" + str(arr[i]) + " ")
          file.write("\n")
 
 def printer():
@@ -64,8 +64,14 @@ def printer():
         for i in range(32):
             file.write(f"0b{binconv1(arr[i])} ")  
         file.write("\n")
-    #printer2()
+    printer2()
 ##########################################################################################
+def end():
+    
+    with open(output, 'a') as file:
+        for key, value in ram_dict.items():
+            file.write(f"{key}:0b{binconv1(value)}\n")
+
 
 #Main Execution
 
@@ -76,7 +82,6 @@ i=0
 while(i<len(ins)):
     if(count_label<0):
         i+=(count_label/4)-1
-        
         i=int(i)
         count_label=0
         continue
@@ -98,34 +103,37 @@ while(i<len(ins)):
 
             if func3 == "000":
                 if func7 == "0000000":
+
                     #print("add,rs1,rs2,rd",rs1,rs2,rd)
                     arr[rd]=arr[rs1]+arr[rs2]
                     pc+=4
                     printer()
 
                 elif func7 == "0100000":
+
                     #print("sub,rs1,rs2,rd",rs1,rs2,rd)
                     arr[rd]=arr[rs1]-arr[rs2]
                     pc+=4
                     printer()
-            elif func3 =="010":
+            elif func3 =="110":
+
                 #print("slt,rs1,rs2,rd",rs1,rs2,rd)
                 arr[rd]=arr[rs1] | arr[rs2]
                 pc+=4
                 printer()
-            elif func3 == "101":
+            elif func3 == "111":
                 #print("srl,rs1,rs2,rd",rs1,rs2,rd)
                 arr[rd]=arr[rs1] & arr[rs2]
                 pc+=4
                 printer()
-            elif func3 == "110":
+            elif func3 == "010":
                 #print("or,rs1,rs2,rd",rs1,rs2,rd)
                 if arr[rs1]<arr[rs2] :     
                     r=1
                     arr[rd]=r
                 pc+=4
                 printer()
-            elif func3 == "111":
+            elif func3 == "101":
                 #print("and,rs1,rs2,rd",rs1,rs2,rd)
                 r=arr[rs1]>>(arr[rs2]%32)
                 arr[rd]=r
@@ -160,17 +168,19 @@ while(i<len(ins)):
             printer()
             #print("jalr,rd,rs1,imm",rd,rs1,imm)
         elif(op=="0100011"):
-            imm1 = int(s[:7], 2)
-            func3 = s[17:20]
-            rs1 = int(s[12:17], 2)
-            rs2 = int(s[7:12], 2)
-            imm2 = int(s[20:25], 2)
-            final = (imm2 << 5) | imm1
-            address=arr[rs1] + imm  
-            ram_dict[decimal_to_hex(address)]=arr[rs2]  
+            imm1 = int(s[:7], 2)  # Lower part of immediate
+            imm2 = int(s[20:25], 2)  # Upper part of immediate
+            sign_bit = int(s[31], 2)  # Sign bit
+
+            # Constructing the full immediate with sign extension
+            final = (sign_bit << 11) | (imm2 << 5) | imm1
+
+            # Calculate memory address
+            address = arr[rs1] + final  
+            ram_dict[decimal_to_hex(address)] = arr[rs2]  
             pc += 4  
             printer()
-            #print("sw,final,rs1,rs2",final,rs1,rs2)
+
 
         elif(op=="1100011"):
             #print("beq,bne")
@@ -193,7 +203,10 @@ while(i<len(ins)):
             # rs2=binary_to_decimal(s[7:12])
             rs1=int(s[12:17],2)
             rs2=int(s[7:12],2)
-
+            if(rs1==0 and rs2==0 and imm==0):
+                printer()
+                end()
+                exit(1)
             if func3 == "000":
                 #print("beq,rs1,rs2,imm",rs1,rs2,imm)
                 if arr[rs1] == arr[rs2]:
@@ -231,8 +244,3 @@ while(i<len(ins)):
         i+=1               #pc+4
 ###################################################################################
 
-##RAM Output
-####################################################################################
-with open(output, 'a') as file:
-    for key, value in ram_dict.items():
-        file.write(f"{key}:0b{binconv1(value)}\n")
