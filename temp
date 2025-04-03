@@ -1,15 +1,26 @@
-            print("jal")
-            rd = int(s[20:25], 2)
-            # imm20=s[0]
-            # imm1_10=s[1:11]
-            # imm11=s[11]
-            # imm12_19=s[19:11:-1]
-            imm=s[0]+s[12:20]+s[10:11]+s[1:11]
-            imm=binary_to_decimal(imm)
-            arr[rd]=pc + 4
-            print("rd and imm are",rd,imm)
-            pc += 2*imm
-            pc= pc & ~1
-            count_label=imm//2
-            #20/:254)-1
-            printer()
+        elif op=="0000001":
+            func7=s[0:8]
+            if func7=="0000000":
+                for i in range(0,32): #rst
+                    arr[i]=0
+                    pc+=4
+                    printer()
+            elif func7=="1000000":
+                printer()
+                end()
+                exit(1)
+            elif func7=="1111111":
+                func3=s[17:20]
+                if func3=="000":
+                    rs1=int(s[12:17])
+                    rs2=int(s[7:12])
+                    rd=int(s[20:25])
+                    arr[rd]=arr[rs1]*arr[rs2]
+                    pc+=4
+                    printer()
+                else:
+                        s=binconv1(arr[rs1])
+                        s1=s[::-1]
+                        arr[rd]=binary_to_decimal(s1)
+                        pc+=4
+                        printer()
