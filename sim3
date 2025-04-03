@@ -107,7 +107,7 @@ while(i<len(ins)):
                     print("sub,rs1,rs2,rd",rs1,rs2,rd)
                     arr[rd]=arr[rs1]-arr[rs2]
                     pc+=4
-                    #printer()
+                    printer()
             elif func3 =="010":
                 print("slt,rs1,rs2,rd",rs1,rs2,rd)
                 arr[rd]=arr[rs1] | arr[rs2]
@@ -132,47 +132,44 @@ while(i<len(ins)):
                 pc+=4
                 printer()
         elif(op=="0000011"):
-            # rd = binary_to_decimal(s[-12:-7])
-            # rs1 = binary_to_decimal(s[-20:-15])
             imm = binary_to_decimal(s[:12])
-            rd = int(s[-12:-7], 2)
-            rs1 = int(s[-20:-15], 2)
-            #imm = int(s[:12], 2)
+            rd = int(s[20:25], 2)
+            rs1 = int(s[12:17], 2)
+            address=arr[rs1]+imm 
+            arr[rd]=ram_dict.get(decimal_to_hex(address), 0)  # Load the word
+            pc+=4 
+            printer()
             print("lw,rd, rs1, imm",rd, rs1, imm)
         elif(op=="0010011"):
-            # rd = binary_to_decimal(s[-12:-7])
-            # rs1 = binary_to_decimal(s[-20:-15])
             imm = binary_to_decimal(s[:12])
             rd = int(s[-12:-7], 2)
             rs1 = int(s[-20:-15], 2)
-            #imm = int(s[:12], 2)
             print("addi,imm, rs1, rd",imm, rs1, rd)
             arr[rd]=arr[rs1]+imm
             pc+=4
 
             printer()
         elif(op=="1100111"):
-            # rd = binary_to_decimal(s[-8:-13:-1])
-            # func3 = s[-13:-16:-1]
-            # rs1 = binary_to_decimal(s[-16:-21:-1])
-            # imm = binary_to_decimal(s[-21:-33:-1])
-            rd = int(s[-8:-13:-1], 2)
-            func3 = s[-13:-16:-1]
-            rs1 = int(s[-16:-21:-1], 2)
-            imm = int(s[-21:-33:-1], 2)
+            rd = int(s[20:25], 2)
+            func3 = s[17:20]
+            rs1 = int(s[12:17], 2)
+            imm = int(s[:12], 2)
+            temp=pc+4
+            pc=(arr[rs1]+imm) & ~1
+            arr[rd]=temp
+            printer()
             print("jalr,rd,rs1,imm",rd,rs1,imm)
         elif(op=="0100011"):
-            # imm1 = binary_to_decimal(s[-8:-13:-1])
-            # func3 = s[-13:-16:-1]
-            # rs1 = binary_to_decimal(s[-16:-21:-1])
-            # rs2 = binary_to_decimal(s[-21:-27:-1])
-            # imm2 = binary_to_decimal(s[-27:-33:-1])
-            imm1 = int(s[-8:-13:-1], 2)
-            func3 = s[-13:-16:-1]
-            rs1 = int(s[-16:-21:-1], 2)
-            rs2 = int(s[-21:-27:-1], 2)
-            imm2 = int(s[-27:-33:-1], 2)
+            imm1 = int(s[:7], 2)
+            func3 = s[17:20]
+            rs1 = int(s[12:17], 2)
+            rs2 = int(s[7:12], 2)
+            imm2 = int(s[20:25], 2)
             final = (imm2 << 5) | imm1
+            address=arr[rs1] + imm  
+            ram_dict[decimal_to_hex(address)]=arr[rs2]  
+            pc += 4  
+            printer()
             print("sw,final,rs1,rs2",final,rs1,rs2)
 
         elif(op=="1100011"):
@@ -221,11 +218,16 @@ while(i<len(ins)):
         elif(op=="1101111"):
             print("jal")
             rd = int(s[-8:-13:-1], 2)
-            imm=int(s[-13:-33:-1],2)
+            imm20=s[0]
+            imm1_10=s[1:11]
+            imm11=s[11]
+            imm12_19=s[19:11:-1]
+            imm=imm1_10+imm11+imm12_19+imm20
+            imm=binary_to_decimal(imm)
             arr[rd]=pc + 4
             pc += imm
             count_label=imm
-            #printer()
+            printer()
         i+=1               #pc+4
 ###################################################################################
 
