@@ -1,8 +1,8 @@
-# import sys
-# filename = sys.argv[1]
-# output = sys.argv[2]
-filename = "testcases.txt" 
-output = "text.txt"
+import sys
+filename = sys.argv[1]
+output = sys.argv[2]
+# filename = "testcases.txt" 
+# output = "text.txt"
 pc=0
 arr=[0]*32
 arr[2]=380
@@ -64,7 +64,7 @@ def printer():
         for i in range(32):
             file.write(f"0b{binconv1(arr[i])} ")  
         file.write("\n")
-    printer2()
+    #printer2()
 ##########################################################################################
 
 #Main Execution
@@ -98,35 +98,35 @@ while(i<len(ins)):
 
             if func3 == "000":
                 if func7 == "0000000":
-                    print("add,rs1,rs2,rd",rs1,rs2,rd)
+                    #print("add,rs1,rs2,rd",rs1,rs2,rd)
                     arr[rd]=arr[rs1]+arr[rs2]
                     pc+=4
                     printer()
 
                 elif func7 == "0100000":
-                    print("sub,rs1,rs2,rd",rs1,rs2,rd)
+                    #print("sub,rs1,rs2,rd",rs1,rs2,rd)
                     arr[rd]=arr[rs1]-arr[rs2]
                     pc+=4
                     printer()
             elif func3 =="010":
-                print("slt,rs1,rs2,rd",rs1,rs2,rd)
+                #print("slt,rs1,rs2,rd",rs1,rs2,rd)
                 arr[rd]=arr[rs1] | arr[rs2]
                 pc+=4
                 printer()
             elif func3 == "101":
-                print("srl,rs1,rs2,rd",rs1,rs2,rd)
+                #print("srl,rs1,rs2,rd",rs1,rs2,rd)
                 arr[rd]=arr[rs1] & arr[rs2]
                 pc+=4
                 printer()
             elif func3 == "110":
-                print("or,rs1,rs2,rd",rs1,rs2,rd)
+                #print("or,rs1,rs2,rd",rs1,rs2,rd)
                 if arr[rs1]<arr[rs2] :     
                     r=1
                     arr[rd]=r
                 pc+=4
                 printer()
             elif func3 == "111":
-                print("and,rs1,rs2,rd",rs1,rs2,rd)
+                #print("and,rs1,rs2,rd",rs1,rs2,rd)
                 r=arr[rs1]>>(arr[rs2]%32)
                 arr[rd]=r
                 pc+=4
@@ -139,12 +139,12 @@ while(i<len(ins)):
             arr[rd]=ram_dict.get(decimal_to_hex(address), 0)  # Load the word
             pc+=4 
             printer()
-            print("lw,rd, rs1, imm",rd, rs1, imm)
+            #print("lw,rd, rs1, imm",rd, rs1, imm)
         elif(op=="0010011"):
             imm = binary_to_decimal(s[:12])
             rd = int(s[-12:-7], 2)
             rs1 = int(s[-20:-15], 2)
-            print("addi,imm, rs1, rd",imm, rs1, rd)
+            #print("addi,imm, rs1, rd",imm, rs1, rd)
             arr[rd]=arr[rs1]+imm
             pc+=4
 
@@ -158,7 +158,7 @@ while(i<len(ins)):
             pc=(arr[rs1]+imm) & ~1
             arr[rd]=temp
             printer()
-            print("jalr,rd,rs1,imm",rd,rs1,imm)
+            #print("jalr,rd,rs1,imm",rd,rs1,imm)
         elif(op=="0100011"):
             imm1 = int(s[:7], 2)
             func3 = s[17:20]
@@ -170,7 +170,7 @@ while(i<len(ins)):
             ram_dict[decimal_to_hex(address)]=arr[rs2]  
             pc += 4  
             printer()
-            print("sw,final,rs1,rs2",final,rs1,rs2)
+            #print("sw,final,rs1,rs2",final,rs1,rs2)
 
         elif(op=="1100011"):
             #print("beq,bne")
@@ -195,19 +195,19 @@ while(i<len(ins)):
             rs2=int(s[7:12],2)
 
             if func3 == "000":
-                print("beq,rs1,rs2,imm",rs1,rs2,imm)
+                #print("beq,rs1,rs2,imm",rs1,rs2,imm)
                 if arr[rs1] == arr[rs2]:
                     pc += imm
                 else:
                     pc += 4
                 printer()
                 if(rs1==rs2 and imm==0):
-                    print("end")
+                    #print("end")
                     printer()
-                    exit(1)
+                    break
 
             elif func3=="001":
-                print("bne ,rs1,rs2,imm",rs1,rs2,imm)
+                #print("bne ,rs1,rs2,imm",rs1,rs2,imm)
                 if arr[rs1] != arr[rs2]:
                     pc += imm
                     count_label=imm
@@ -216,7 +216,7 @@ while(i<len(ins)):
                 printer()
 
         elif(op=="1101111"):
-            print("jal")
+            #print("jal")
             rd = int(s[-8:-13:-1], 2)
             imm20=s[0]
             imm1_10=s[1:11]
