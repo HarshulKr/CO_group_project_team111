@@ -1,3 +1,17 @@
+import sys
+filename = sys.argv[1]
+output = sys.argv[2]
+
+# filename = "testcases.txt" 
+# output = "text.txt"
+
+pc=0
+arr=[0]*32
+arr[2]=380
+label_flag=True
+stack_dict = {f"0x{addr:08X}": 0 for addr in range(0x00000100, 0x00000180, 4)}
+ram_dict = {f"0x{addr:08X}": 0 for addr in range(0x00010000, 0x00010080, 4)}
+
 #conversions
 #####################################################################################
 def twos_complement1(n: int, bit_length: int = 32) -> str:
