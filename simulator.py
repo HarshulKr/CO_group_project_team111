@@ -136,7 +136,24 @@ while(i<len(ins)):
             arr[rd]=arr[rs1]+imm
             pc+=4
             printer()
-        
+
+        elif(op=="1100111"):
+            rd = int(s[20:25], 2)
+            func3 = s[17:20]
+            rs1 = int(s[12:17], 2)
+            imm = binary_to_decimal(s[:12])
+            if (rd==0):
+                temp =pc 
+                pc= (arr[rs1]+ (imm))
+                printer()
+                
+            else:
+                temp =pc 
+                pc= (arr[rs1]+ (imm))
+                i=(pc//4)-1
+                arr[rd]= temp+4
+                printer()
+                
         elif (op=="0000001"):
             func7=s[0:7]
             if func7=="0000000":
