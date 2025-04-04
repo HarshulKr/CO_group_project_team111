@@ -168,3 +168,63 @@ while(i<len(ins)):
                     arr[rd]=binary_to_decimal(s1)
                     pc+=4
                     printer()
+        
+        elif(op=="0100011"):
+            #SW
+            imm1 = s[:7]            
+            imm2 = (s[20:25])
+            imm=imm1+imm2
+            imm=binary_to_decimal(imm)
+            rs2=int(s[7:12],2)
+            rs1=int(s[12:17],2)
+            address = arr[rs1] + imm
+            if(decimal_to_hex(address) in ram_dict):
+                ram_dict[decimal_to_hex(address)] = arr[rs2]  
+            else:
+                stack_dict[decimal_to_hex(address)] = arr[rs2]  
+            pc += 4  
+            printer()
+
+
+        elif(op=="1100011"):
+            imm1=s[20:25]
+            imm2=s[0:7]
+            imm12=imm2[0]
+            imm5_10=imm2[6:0:-1]
+            imm11=imm1[4]
+            imm1_4=imm1[3:0:-1]+imm1[0]
+            imm="0"+imm1_4+imm5_10+imm11+imm12
+            imm=imm[::-1]
+            imm = binary_to_decimal(imm)
+            func3 = s[17:20]
+            rs1=int(s[12:17],2)
+            rs2=int(s[7:12],2)
+            if(rs1==0 and rs2==0 and imm==0):
+                printer()
+                end()
+                exit(1)
+            if func3 == "000":
+                if arr[rs1] == arr[rs2]:
+                    pc += imm
+                else:
+                    pc += 4
+                printer()
+                if(rs1==rs2 and imm==0):
+                    printer()
+                    break
+
+            elif func3=="001":
+                if arr[rs1] != arr[rs2]:
+                    pc += imm
+                else:
+                    pc += 4
+                printer()
+
+        elif(op=="1101111"):
+            rd = int(s[20:25], 2)
+            imm=s[0]+s[12:20]+s[11]+s[1:11]+"0"
+            imm=binary_to_decimal(imm)
+            arr[rd]=pc + 4
+            pc=pc+imm
+            printer()
+            
