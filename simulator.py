@@ -52,31 +52,6 @@ def decimal_to_hex(n):
 
 #I/O
 #######################################################################################
-with open(output,'w') as file:
-    file.write("")
-
-def read_assembly_file(filename):
-    instructions = []
-    with open(filename,'r') as file:
-        for line in file:
-            line=line.strip()
-            if line and not line.startswith('#'):
-                instructions.append(line)
-    return instructions
-
-def printer():
-    with open(output, 'a') as file:
-        file.write(f"0b{binconv1(pc)} ")
-        for i in range(32):
-            file.write(f"0b{binconv1(arr[i])} ")  
-        file.write("\n")
-    # printer2()
-##########################################################################################
-def end():  
-    with open(output, 'a') as file:
-        for key, value in ram_dict.items():
-            file.write(f"{key}:0b{binconv1(value)}\n")
-
 
 #Main Execution
 
