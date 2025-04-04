@@ -17,10 +17,12 @@ ram_dict = {f"0x{addr:08X}": 0 for addr in range(0x00010000, 0x00010080, 4)}
 def twos_complement1(n: int, bit_length: int = 32) -> str:
     return format((1 << bit_length) + n, f'0{bit_length}b')
 
+
 def binconv1(n):
     if n<0:
         return twos_complement1(n)
     return format(n, '032b')
+
 
 def binary_to_decimal(binary: str) -> int:
     length = len(binary)
@@ -31,6 +33,7 @@ def binary_to_decimal(binary: str) -> int:
         return -decimal
     else:
         return int(binary, 2)
+
 
 def decimal_to_hex(n):
     result = f'{n:x}'
